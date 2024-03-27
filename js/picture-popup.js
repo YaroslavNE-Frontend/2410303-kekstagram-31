@@ -1,21 +1,20 @@
-import { isEscapeKey } from './util.js';
+import { addModalOpen, isEscapeKey } from './utils.js';
 import { generateComments, commentsList, countClear } from './generate-comments-block.js';
 
 const bigPicturePopup = document.querySelector('.big-picture');
 const bigPictureClose = bigPicturePopup.querySelector('.big-picture__cancel');
 
-const modalOpen = document.querySelector('body');
-
 const commentLoaderButton = bigPicturePopup.querySelector('.comments-loader');
 let onLoadCommentsClick;
+let onDocumentKeydown = () => {};
 
 const clearBigPicturePopup = () => {
   commentsList.textContent = '';
   countClear();
 };
 
-const drawBigPicturePopup = (posts) => {
-  const {url, likes, description, comments} = posts;
+const drawBigPicturePopup = (miniature) => {
+  const {url, likes, description, comments} = miniature;
 
   const bigPicture = document.querySelector('.big-picture__img img');
   const bigPictureLikes = document.querySelector('.likes-count');
@@ -26,6 +25,8 @@ const drawBigPicturePopup = (posts) => {
   bigPictureLikes.textContent = likes;
   socialCaption.textContent = description;
 
+  commentsList.textContent = '';
+
   generateComments(comments);
 
   onLoadCommentsClick = (evt) => {
@@ -35,29 +36,29 @@ const drawBigPicturePopup = (posts) => {
 
 };
 
-const onDocumentKeydown = (evt) => {
+const openPopup = () => {
+  bigPicturePopup.classList.remove('hidden');
+  addModalOpen();
+
+  document.addEventListener('keydown', onDocumentKeydown);
+  commentLoaderButton.addEventListener('click', onLoadCommentsClick);
+};
+
+const closePopup = () => {
+  bigPicturePopup.classList.add('hidden');
+  addModalOpen();
+
+  document.removeEventListener('keydown', onDocumentKeydown);
+  commentLoaderButton.removeEventListener('click', onLoadCommentsClick);
+  clearBigPicturePopup();
+};
+
+onDocumentKeydown = (evt) => {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
     closePopup();
   }
 };
-
-function openPopup () {
-  bigPicturePopup.classList.remove('hidden');
-  modalOpen.classList.add('.modal-open');
-
-  document.addEventListener('keydown', onDocumentKeydown);
-  commentLoaderButton.addEventListener('click', onLoadCommentsClick);
-}
-
-function closePopup() {
-  bigPicturePopup.classList.add('hidden');
-  modalOpen.classList.remove('.modal-open');
-
-  document.removeEventListener('keydown', onDocumentKeydown);
-  commentLoaderButton.removeEventListener('click', onLoadCommentsClick);
-  clearBigPicturePopup();
-}
 
 bigPictureClose.addEventListener('click', (evt) => {
   evt.preventDefault();

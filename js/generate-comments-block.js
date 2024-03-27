@@ -1,4 +1,4 @@
-import { createElement } from './util.js';
+import { createElement } from './utils.js';
 
 const CountCommentValues = {
   START_COUNT: 0,
@@ -22,7 +22,6 @@ const generateCommentsTemplate = () => {
 
 const generateComments = (comments) => {
   const commentTemplate = generateCommentsTemplate();
-  commentsList.textContent = '';
 
   const commentListFragment = document.createDocumentFragment();
 
@@ -31,28 +30,29 @@ const generateComments = (comments) => {
 
   const loadMoreButton = document.querySelector('.social__comments-loader');
 
-  if (count >= comments.length) {
-    count = comments.length;
+  if (count + CountCommentValues.STEP_COUNT >= comments.length) {
     loadMoreButton.classList.add('hidden');
+    countCommentsShow.textContent = comments.length;
   } else {
     loadMoreButton.classList.remove('hidden');
+    countCommentsShow.textContent = count + CountCommentValues.STEP_COUNT;
   }
 
-  countCommentsShow.textContent = count;
   countCommentsTotal.textContent = comments.length;
 
-  for (let i = 0; i < count; i++) {
+  comments.slice(count, count + CountCommentValues.STEP_COUNT).forEach((comment) => {
+    const {avatar, name, message} = comment;
     const commentElement = commentTemplate.cloneNode(true);
 
     const commentUserImg = commentElement.querySelector('.social__picture');
     const commentUserMessage = commentElement.querySelector('.social__text');
 
-    commentUserImg.src = comments[i].avatar;
-    commentUserImg.alt = comments[i].name;
-    commentUserMessage.textContent = comments[i].message;
+    commentUserImg.src = avatar;
+    commentUserImg.alt = name;
+    commentUserMessage.textContent = message;
 
     commentListFragment.append(commentElement);
-  }
+  });
 
   commentsList.append(commentListFragment);
 
@@ -60,7 +60,7 @@ const generateComments = (comments) => {
 };
 
 const countClear = () => {
-  count = CountCommentValues.STEP_COUNT;
+  count = CountCommentValues.START_COUNT;
 };
 
 export { generateCommentsTemplate, generateComments, commentsList, countClear };

@@ -1,9 +1,20 @@
-import {
-  imagePreview, sliderElement,
-  effectLevelValue, sliderPanel,
-} from './elements.js';
-
 import { effectOption } from './effect-option-list.js';
+
+const imagePreview = document.querySelector('.img-upload__preview img');
+
+const sliderElement = document.querySelector('.effect-level__slider');
+const sliderPanel = document.querySelector('.img-upload__effect-level');
+const effectLevelValue = document.querySelector('.effect-level__value');
+
+let currentEffect = effectOption.none;
+
+const applyFilter = () => {
+  if (currentEffect.FILTER_NAME === 'none') {
+    imagePreview.style.filter = 'none';
+  } else {
+    imagePreview.style.filter = `${currentEffect.FILTER_NAME}(${effectLevelValue.value}${currentEffect.UNIT})`;
+  }
+};
 
 const createSlider = () => {
   imagePreview.style.transform = 'scale(1)';
@@ -17,6 +28,11 @@ const createSlider = () => {
   });
   sliderElement.setAttribute('disabled', true);
   sliderPanel.classList.add('hidden');
+
+  sliderElement.noUiSlider.on('update', () => {
+    effectLevelValue.value = sliderElement.noUiSlider.get();
+    applyFilter();
+  });
 };
 
 const editSlider = (minValue, maxValue, stepValue) => {
@@ -41,24 +57,19 @@ const hideSlider = (name) => {
 
 const changeImageEffect = (button) => {
   const effect = effectOption[button];
+  currentEffect = effect;
 
   hideSlider(effect.FILTER_NAME);
   editSlider(effect.MIN, effect.MAX, effect.STEP);
-
-  sliderElement.noUiSlider.on('update', () => {
-    effectLevelValue.value = sliderElement.noUiSlider.get();
-    if (effect.FILTER_NAME === 'none') {
-      imagePreview.style.filter = 'none';
-    } else {
-      imagePreview.style.filter = `${effect.FILTER_NAME}(${effectLevelValue.value}${effect.UNIT})`;
-    }
-  });
 };
 
 const clearEffects = () => {
-  sliderElement.noUiSlider.destroy();
   effectLevelValue.value = 0;
-  imagePreview.style.filter = null;
+  imagePreview.style.filter = effectOption.none.FILTER_NAME;
 };
 
-export { changeImageEffect, sliderElement, clearEffects, createSlider };
+const deleteSlider = () => {
+  sliderElement.noUiSlider.destroy();
+};
+
+export { changeImageEffect, sliderElement, clearEffects, createSlider, deleteSlider };
